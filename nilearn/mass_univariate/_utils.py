@@ -132,7 +132,9 @@ def calculate_tfce(
 
 def _return_score_threshs(arr3d, dh, two_sided_test):
     """Compute list of score threshold to use for TFCE."""
-    max_score = np.max(np.abs(arr3d)) if two_sided_test else np.max(arr3d)
+    max_score = (
+        np.nanmax(np.abs(arr3d)) if two_sided_test else np.nanmax(arr3d)
+    )
     number_steps = 100 if dh == "auto" else max(1, round(max_score / dh))
     return np.linspace(0, max_score, number_steps + 1)[1:]
 

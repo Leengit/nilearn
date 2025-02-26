@@ -272,13 +272,35 @@ def test_t_score_with_covars_and_normalized_design_withcovar(rng):
 
 
 @pytest.mark.parametrize("two_sided_test", [True, False])
-@pytest.mark.parametrize("dh", [1 / 49, "auto", 0.1])
-@pytest.mark.parametrize("arr3d", [np.ones((10, 11)), _rng().random((10, 11))])
+@pytest.mark.parametrize(
+    "dh",
+    [
+        1 / 49,
+        0.1,
+        0.9,
+        "auto",
+    ],
+)
+@pytest.mark.parametrize(
+    "arr3d",
+    [
+        np.ones((10, 11), dtype="float"),
+        _rng().random((10, 11), dtype="float"),
+        _rng().normal(size=(10, 11)),
+    ],
+)
 def test_return_score_threshs(arr3d, two_sided_test, dh):
-    """Check that the range of thresholds to test."""
+    """Check that the range of thresholds to test.
+
+    Also test for robustness to nan values.
+    """
+    arr3d[0, 0] = np.nan
+
     score_threshs = _utils._return_score_threshs(
         arr3d, dh=dh, two_sided_test=two_sided_test
     )
 
-    max_score = np.max(np.abs(arr3d)) if two_sided_test else np.max(arr3d)
+    max_score = (
+        np.nanmax(np.abs(arr3d)) if two_sided_test else np.nanmax(arr3d)
+    )
     assert np.sum(score_threshs > max_score) == 0
